@@ -91,4 +91,34 @@ Pipfile.lock
 # Pyre type checker
 .pyre/
 
-# pytype static type
+# pytype static type analyzer
+.pytype/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+
+# Rider
+.idea/
+*.sln
+*.suo
+*.user
+*.userossc
+*.sln.docstates
+
+# Visual Studio
+.vs/
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
