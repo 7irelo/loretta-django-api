@@ -1,3 +1,5 @@
-/venv
-.vs
-.idea
+venv/
+.vs/
+.idea/
+__pycache__/
+migrations/
