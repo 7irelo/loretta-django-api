@@ -1,6 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .models import Account
+from app.models import Account
 from .serializers import AccountSerializer
 
 class AccountListView(generics.ListAPIView):
