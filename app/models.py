@@ -19,15 +19,18 @@ class UserManager(BaseUserManager):
         return self.create_user(username, email, password, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=255, unique=True)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=255, unique=True)
+    id = models.CharField(max_length=50, primary_key=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
     address = models.CharField(max_length=255)
-    occupation = models.CharField(max_length=255, blank=True, null=True)
-    created = models.DateTimeField(default=timezone.now)
-    roles = models.JSONField(default=list)
+    date_of_birth = models.DateField()
+    occupation = models.CharField(max_length=50, blank=True, null=True)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=50, unique=True)
+    password = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -59,22 +62,39 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 class Account(models.Model):
+    ACCOUNT_TYPE_CHOICES = [
+        ('Savings', 'Savings'),
+        ('Cheque', 'Cheque'),
+        ('Credit', 'Credit'),
+    ]
+
+    ACCOUNT_STATUS_CHOICES = [
+        ('Active', 'Active'),
+        ('Inactive', 'Inactive'),
+        ('Closed', 'Closed'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    type = models.CharField(max_length=255)
-    balance = models.FloatField()
-    status = models.CharField(max_length=255)
-    created = models.DateTimeField(default=timezone.now)
+    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES)
+    available_balance = models.FloatField(default=0.0)
+    latest_balance = models.FloatField(default=0.0)
+    account_status = models.CharField(max_length=8, choices=ACCOUNT_STATUS_CHOICES, default='Active')
+    image_url = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.type}"
+        return f"{self.user.username} - {self.account_type}"
 
 
 class Transaction(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='transactions')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    account_type = models.CharField(max_length=50)
     amount = models.FloatField()
-    type = models.CharField(max_length=255)
-    description = models.CharField(max_length=255)
-    timestamp = models.DateTimeField(default=timezone.now)
+    date = models.DateTimeField(auto_now_add=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    journal_type = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return f"{self.account.user.username} - {self.type} - {self.amount}"
+

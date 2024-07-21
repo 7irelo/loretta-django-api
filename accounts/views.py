@@ -2,32 +2,36 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from app.models import Account
 from .serializers import AccountSerializer
+from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 
-class AccountListView(generics.ListAPIView):
+class AccountListCreateView(generics.ListCreateAPIView):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
+    permission_classes = [IsAuthenticated]
 
-class AccountDetailView(generics.RetrieveAPIView):
+    def perform_create(self, serializer):
+        serializer.save()
+
+class AccountDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
+    permission_classes = [IsAuthenticated]
 
-class AccountUpdateView(generics.UpdateAPIView):
-    queryset = Account.objects.all()
-    serializer_class = AccountSerializer
+    def get_object(self):
+        obj = get_object_or_404(Account, pk=self.kwargs["pk"])
+        return obj
 
-class AccountDeleteView(generics.DestroyAPIView):
-    queryset = Account.objects.all()
-    serializer_class = AccountSerializer
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
 
-class AccountQueryView(generics.ListAPIView):
-    serializer_class = AccountSerializer
+        return Response(serializer.data)
 
-    def get_queryset(self):
-        queryset = Account.objects.all()
-        search = self.request.query_params.get('search', None)
-        limit = self.request.query_params.get('limit', None)
-        if search:
-            queryset = queryset.filter(name__startswith=search)
-        if limit:
-            queryset = queryset[:int(limit)]
-        return queryset
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
